@@ -1,1 +1,1 @@
-# files to download from bham
+# files for uploading to bham
