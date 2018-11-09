@@ -1478,20 +1478,20 @@ regr_whole<-function(vari,outi,crv,cutoff=NULL,part=10,mode,cmode='det',predm='e
 
 
 
-quadr<-function(A){
+quadr<-function(A,n){
 B<-A
-for (i in 1:dim(A)[2]){
+for (i in 1:n){
   B=cbind(B,A[,i:dim(A)[2]]*A[,i])
 }
 
 B
 }
 
-cub<-function(A){
+cub<-function(A,n){
   
-  B<-quadr(A)
+  B<-quadr(A,n)
   
-  n<-dim(A)[2]
+  #n<-dim(A)[2]
   
   m<-dim(B)[2]
   
