@@ -7,6 +7,7 @@
 #maximal number of variables
 #cubic function
 #relative error for zeros
+#correlations - new parameters
 
 #'Turning a non-numeric variable into a numeric one
 #'
@@ -745,7 +746,7 @@ AUC <- function(probs, class) {
 #'
 #'cross_val(vari,out,1:2,10,10,100,c(1,1),2,preds,'binary','det','exact',0.5,'acc',nr=c(1,4))
 
-cross_val<-function(vari,outi,c,rule,part,l,we,vari_col,preds,mode,cmode,predm,cutoff,objfun,minx=NULL,maxx=NULL,nr=NULL,maxw=NULL,st=NULL){
+cross_val<-function(vari,outi,c,rule,part,l,we,vari_col,preds,mode,cmode,predm,cutoff,objfun,minx=NULL,maxx=NULL,nr=NULL,maxw=NULL,st=NULL,corr=1){
   
   if ((objfun!='acc')&(objfun!='roc')) stop('Unknown value of the parameter "objfun"')
   
@@ -841,11 +842,22 @@ cross_val<-function(vari,outi,c,rule,part,l,we,vari_col,preds,mode,cmode,predm,c
       
       for (k in 1:length(ai)){
         
+
+        
         set_num<-make_numeric_sets(a,ai,k,vari,ra,l)
         
         testset1<-set_num$test
         
         trset1<-set_num$tr
+        
+        corr1<-0
+        
+        if (corr<1){
+          
+          corr1<-cor(trset1)
+        }
+        
+        if ((length(corr1[corr1>corr])<=length(a[,ai[k]]))|(corr==1)){
         
         
         if (mode=='linear'){
@@ -896,7 +908,7 @@ cross_val<-function(vari,outi,c,rule,part,l,we,vari_col,preds,mode,cmode,predm,c
             preds[j,k]<-AUC(1-p,outi[setdiff(1:l,ra)])
           }
         }
-        
+      } 
       }
     }
   }
@@ -1120,7 +1132,7 @@ get_indices<-function(predsp,nvar,c,we,st){
 
 
 
-regr_ind<-function(vari,outi,crv,cutoff=NULL,part=10,mode,cmode='det',predm='exact',objfun='acc',parallel=FALSE,cores,minx=NULL,maxx=NULL,nr=NULL,maxw=NULL,st=NULL,rule=10){
+regr_ind<-function(vari,outi,crv,cutoff=NULL,part=10,mode,cmode='det',predm='exact',objfun='acc',parallel=FALSE,cores,minx=NULL,maxx=NULL,nr=NULL,maxw=NULL,st=NULL,rule=10,corr=1){
   
   on.exit(closeAllConnections());
   
@@ -1202,7 +1214,7 @@ regr_ind<-function(vari,outi,crv,cutoff=NULL,part=10,mode,cmode='det',predm='exa
     
     
     
-    cross_val(vari,outi,c,rule,part,l,we,vari_col,preds,mode,cmode,predm,cutoff,objfun,minx,maxx,nr,maxw,st);
+    cross_val(vari,outi,c,rule,part,l,we,vari_col,preds,mode,cmode,predm,cutoff,objfun,minx,maxx,nr,maxw,st,corr);
     #   cross_val(vari,outi,c,rule,part,l,we,vari_col,preds,mode,cmode,predm,cutoff,objfun);
     
     
@@ -1389,7 +1401,7 @@ regr_ind<-function(vari,outi,crv,cutoff=NULL,part=10,mode,cmode='det',predm='exa
 
 
 
-regr_whole<-function(vari,outi,crv,cutoff=NULL,part=10,mode,cmode='det',predm='exact',objfun='acc',parallel=FALSE,cores,minx=NULL,maxx=NULL,nr=NULL,maxw=NULL,st=NULL,rule=10){
+regr_whole<-function(vari,outi,crv,cutoff=NULL,part=10,mode,cmode='det',predm='exact',objfun='acc',parallel=FALSE,cores,minx=NULL,maxx=NULL,nr=NULL,maxw=NULL,st=NULL,rule=10,corr=1){
   
   if ((objfun=='roc')&(mode!='binary')) {
     
@@ -1397,7 +1409,7 @@ regr_whole<-function(vari,outi,crv,cutoff=NULL,part=10,mode,cmode='det',predm='e
     
   }
   
-  ind<-regr_ind(vari,outi,crv,cutoff,part,mode,cmode,predm,objfun,parallel,cores,minx,maxx,nr,maxw,st,rule)
+  ind<-regr_ind(vari,outi,crv,cutoff,part,mode,cmode,predm,objfun,parallel,cores,minx,maxx,nr,maxw,st,rule,corr)
   
   if (mode=='linear'){
     
